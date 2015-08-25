@@ -4,7 +4,7 @@ var partials = require('express-partials');
 var bodyParser = require('body-parser');
 var bcrypt = require('bcrypt-nodejs');
 var session = require('express-session');
-var uuid = require('node-uuid');
+
 
 var db = require('./app/config');
 var Users = require('./app/collections/users');
@@ -23,14 +23,7 @@ app.use(bodyParser.json());
 // Parse forms (signup/login)
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(express.static(__dirname + '/public'));
-app.use(session({
-  resave: false,
-  saveUninitialized: false,
-  genid:function(req){ //function call to generate new session id ---> return string.
-    return uuid.v4()
-  },
-  secret: 'keyboard cat'
-}));
+
 
 
 
@@ -93,30 +86,29 @@ function(req, res) {
 
 app.get('/login', function(req, res){
   res.render('/');
-})
+});
 
 app.post('/login', function(req, res){
-  console.log('request', req.body.username);
-  var user = new User({'username': req.body.username});
-    console.log('reaches this line');
+  var username = req.body.username;
+  var passwordAttempt = req.body.password;
 
+new User({ username: username }).fetch().then(function(found) {
+    if (found) { // also have to check if password input is same as hashed password
+      res.redirect('/');
+    } else {
+      res.redirect('/login');
+      }
 
- //userObj = db.users.get({username: username, password: hash});
-
- //  if(userObj){
- //    req.session.regenerate(function(){
- //      req.session.user = userObj.username;
- //      res.redirect('/restricted');
- //    })
- //  } else {
-
-   // if user doesn't exist, stay on login page
-     // fill in
-    // if they exist, send them to the shorting page
-    res.redirect('/');
   })
+});
 
+app.get('/signup', function(req, res){
+  res.render('signup');
+});
 
+// app.post('/signup', function(req, res) {
+//   res.render('/signup');
+// })
 /************************************************************/
 // Handle the wildcard route last - if all other routes fail
 // assume the route is a short code and try and handle it here.

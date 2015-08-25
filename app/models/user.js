@@ -7,12 +7,10 @@ var User = db.Model.extend({
 
 
   initialize: function() {
-    console.log('this atrributes', this.attributes)
     this.on('creating', function(model, attrs, options){
     var username = this.attributes.username;
     var salt = bcrypt.genSaltSync(10);
     var password = bcrypt.hashSync(password, salt);
-    console.log('username and password', username, password);
     })
   },
 
