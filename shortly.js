@@ -2,7 +2,9 @@ var express = require('express');
 var util = require('./lib/utility');
 var partials = require('express-partials');
 var bodyParser = require('body-parser');
-
+var bcrypt = require('bcrypt-nodejs');
+var session = require('express-session');
+var uuid = require('node-uuid');
 
 var db = require('./app/config');
 var Users = require('./app/collections/users');
@@ -21,26 +23,35 @@ app.use(bodyParser.json());
 // Parse forms (signup/login)
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(express.static(__dirname + '/public'));
+app.use(session({
+  resave: false,
+  saveUninitialized: false,
+  genid:function(req){ //function call to generate new session id ---> return string.
+    return uuid.v4()
+  },
+  secret: 'keyboard cat'
+}));
 
 
-app.get('/', 
+
+app.get('/',
 function(req, res) {
   res.render('index');
 });
 
-app.get('/create', 
+app.get('/create',
 function(req, res) {
   res.render('index');
 });
 
-app.get('/links', 
+app.get('/links',
 function(req, res) {
   Links.reset().fetch().then(function(links) {
     res.send(200, links.models);
   });
 });
 
-app.post('/links', 
+app.post('/links',
 function(req, res) {
   var uri = req.body.url;
 
@@ -78,6 +89,32 @@ function(req, res) {
 // Write your authentication routes here
 /************************************************************/
 
+
+
+app.get('/login', function(req, res){
+  res.render('/');
+})
+
+app.post('/login', function(req, res){
+  console.log('request', req.body.username);
+  var user = new User({'username': req.body.username});
+    console.log('reaches this line');
+
+
+ //userObj = db.users.get({username: username, password: hash});
+
+ //  if(userObj){
+ //    req.session.regenerate(function(){
+ //      req.session.user = userObj.username;
+ //      res.redirect('/restricted');
+ //    })
+ //  } else {
+
+   // if user doesn't exist, stay on login page
+     // fill in
+    // if they exist, send them to the shorting page
+    res.redirect('/');
+  })
 
 
 /************************************************************/
